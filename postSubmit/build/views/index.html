@@ -1,0 +1,170 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>几种form提交方式</title>
+    <style>
+        form{
+            border: 1px dashed #4e4e4e;
+            padding:10px;
+        }
+    </style>
+</head>
+<body>
+<h1>1. 不用js，标签中设置action="http://192.168.0.102:3000/post" method="POST"直接提交。</h1>
+<form id="f1" action="/post" method="POST" enctype="multipart/form-data">
+    <div class="notice" ></div>
+    <div class="uploadWrap">
+        <h3>File Upload</h3>
+        <p>Try uploading multiple files at a time.</p>
+        <div class="label clear"><b class="fl">选择图片</b><span id="label_url" class="fl"></span></div>
+        <input type="file" id="upload" name="file" multiple>
+        <input type="text" name="userName" value="alice">
+        <input type="text" name="email" value="test@163.com">
+        <input class="submit" type="submit" value="直接提交">
+    </div>
+    <div id="preview">
+    </div>
+</form>
+<h1>2.
+    a. 用jquery.ajax提交,使用FormData模拟上传数据。
+    b. 从request可以看出，此时采用的是Request payload形式上传,Content-Type:multipart/form-data; boundary=----WebKitFormBoundaryXG8pkpttdXcCx3ik
+    c. 文件顺利上传了。
+    d. 后台取得参数的方式，如下，取文本(对象)：ctx.request.body.fields；取文件(数组)：ctx.request.body.files.file。
+    e. 而且form标签中可不写enctype="multipart/form-data"，request会自动识别。
+    d. 缺点，对IE的兼容只到10.
+</h1>
+<!--enctype="multipart/form-data"-->
+<form id="f2">
+
+        <input type="file" name="file" multiple>
+        <input type="text" name="userName" value="alice2222">
+        <input type="text" name="email" value="test2222@163.com">
+        <input class="submit" type="submit" value="ajax提交">
+
+</form>
+
+<h1>5. 采用表单控件jquery.from.js提交
+    完美兼容IE各版本。
+    能上传文件。
+</h1>
+<form id="f5">
+
+    <input type="file" name="file" multiple>
+    <input type="text" name="userName" value="alice555">
+    <input type="text" name="email" value="test5555@163.com">
+    <input class="submit" type="submit" value="jqueryFrom提交">
+
+</form>
+
+<h1>3.
+    a. 用jquery.ajax提交，用serialize()处理上传数据。
+    b. 从request可以看出，此时采用的是FormData形式上传,Content-Type:application/x-www-form-urlencoded; charset=UTF-8，
+    c. 但无法解析文件，文件上传不上去。
+    d. 后台取得参数的方式，如下：ctx.request.body.userName
+</h1>
+<form id="f3" action="" method="POST" enctype="multipart/form-data" onsubmit="javascript:return false;">
+
+<input type="file" name="file" multiple>
+<input type="text" name="userName" value="alice333">
+<input type="text" name="email" value="test333@163.com">
+<input class="submit" type="submit" value="Upload">
+
+</form>
+
+<h1>4. $.submit()提交</h1>
+<form id="f4" action="/post" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file" multiple>
+    <input type="text" name="userName" value="alice333">
+    <input type="text" name="email" value="test333@163.com">
+    <input class="submit" type="submit" value="$.submit()提交">
+</form>
+
+
+
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery.form/4.2.1/jquery.form.min.js"></script>
+<script>
+    //#f5 $(XX).ajaxSubmit({})
+    $(function(){
+        $('#f5').submit(function(){
+            console.log('in #f5');
+            $('#f5').ajaxSubmit({
+                url:'http://192.168.0.102:3000/post',
+                type:'post',
+                success:function(responseText){
+                    console.log('f5:',responseText);
+                }
+            });
+            return false;
+        });
+
+    })
+</script>
+<script>
+    //#f2 用jquery.ajax提交,使用FormData模拟上传数据
+    $(function(){
+        $('#f2 .submit').click(function(e){
+            console.log('in f2');
+            e.preventDefault();
+            var formData = new FormData($('#f2').get(0));
+//            还可以这样为FormData的实例赋值
+//            var form = new FormData();
+//            form.append("username","zxj");
+//            form.append("password",123456);
+            $.ajax({
+                type:"post",
+                url:'http://192.168.0.102:3000/post',//url跟后台路由url完全一致
+                data:formData,
+                processData:false,// 告诉jQuery不要去处理发送的数据
+                contentType:false,// 告诉jQuery不要去设置Content-Type请求头
+                beforeSend:function(){
+                    console.log('正在提交，请稍候。。。。');
+                },
+                success:function(data){
+                    console.log('response data::::::::::::::::::',data);
+                },
+                error:function(e){
+                    console.log('error::::',e);
+                }
+            })
+        })
+
+</script>
+<script>
+    // #f3 用jquery.ajax提交，用serialize()处理上传数据
+    $(function(){
+        $('#f3 .submit').click(function(e){
+            console.log('in f3');
+            e.preventDefault();
+            var formdata = $("#f2").serialize();
+
+            $.ajax({
+                type:"post",
+                url:'/post',//url跟后台路由url完全一致
+                data:formdata,
+//                processData:false,// 告诉jQuery不要去处理发送的数据
+//                contentType:false,// 告诉jQuery不要去设置Content-Type请求头
+                beforeSend:function(){
+                    console.log('正在提交，请稍候。。。。');
+                },
+                success:function(data){
+                    console.log('response data::::::::::::::::::',data);
+                },
+                error:function(e){
+                    console.log('error::::',e);
+                }
+            })
+        })
+    })
+</script>
+<script>
+    //#f4 $.submit()提交
+    $(function(){
+        $('#f4 .submit').click(function(){
+            $('#f4').submit();
+        })
+    })
+</script>
+</html>
