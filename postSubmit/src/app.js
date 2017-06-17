@@ -35,31 +35,31 @@ router.post('/post',async function(ctx, next) {
     if ('POST' != ctx.method) return await next();
     console.log('request.body::::',ctx.request.body,ctx.request.body.userName,ctx.request.body.email);
     //取得表单元素
-    // let params = ctx.request.body.fields;
-    // //解析参数的代码
-    // let useName = params.userName;
-    // let email = params.email;
-    // //console.log('post params:::::useName,email',useName,email);
-    //
-    // //取得上传文件
-    // let files = ctx.request.body.files.file;
-    // files = Array.isArray(files)?files:Array.of(files); //将单个对象转换为数组
-    // if(files.length>0){
-    //     for(var item of files) {
-    //         if(item.size==0) continue;
-    //         // console.log('size!=0');
-    //         // console.log('item:::::::::::::::::::::::::::::::::::::::::',item);
-    //         var tmpath= item['path'];
-    //         var tmparr =item['name'].split('.');
-    //         var ext ='.'+tmparr[tmparr.length-1];
-    //         var newpath =path.join('public/upload', parseInt(Math.random()*100) + Date.parse(new Date()).toString() + ext);
-    //         const stream = fs.createWriteStream(newpath);//创建一个可写流
-    //         fs.createReadStream(tmpath).pipe(stream);//可读流通过管道写入可写流
-    //         // console.log('uploading %s -> %s', item.name, stream.path);
-    //         // console.log('-----------------------------------------------------');
-    //         //ctx.redirect('/');
-    //     }
-    // }
+    let params = ctx.request.body.fields;
+    //解析参数的代码
+    let useName = params.userName;
+    let email = params.email;
+    //console.log('post params:::::useName,email',useName,email);
+
+    //取得上传文件
+    let files = ctx.request.body.files.file;
+    files = Array.isArray(files)?files:Array.of(files); //将单个对象转换为数组
+    if(files.length>0){
+        for(var item of files) {
+            if(item.size==0) continue;
+            // console.log('size!=0');
+            // console.log('item:::::::::::::::::::::::::::::::::::::::::',item);
+            var tmpath= item['path'];
+            var tmparr =item['name'].split('.');
+            var ext ='.'+tmparr[tmparr.length-1];
+            var newpath =path.join('public/upload', parseInt(Math.random()*100) + Date.parse(new Date()).toString() + ext);
+            const stream = fs.createWriteStream(newpath);//创建一个可写流
+            fs.createReadStream(tmpath).pipe(stream);//可读流通过管道写入可写流
+            // console.log('uploading %s -> %s', item.name, stream.path);
+            // console.log('-----------------------------------------------------');
+            //ctx.redirect('/');
+        }
+    }
 
     ctx.body=ctx.request.body;
 });
